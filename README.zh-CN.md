@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🦌 iDeer
+# iDeer: 🦌 is all u need
 
 **一只替你刷技术情报的赛博鹿**
 
