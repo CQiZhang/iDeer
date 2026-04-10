@@ -113,6 +113,10 @@ class BaseSource(ABC):
         """Return a unique cache filename (without extension) for an item."""
         pass
 
+    # Maximum items in the final email/output. Subclass get_max_items() controls
+    # per-source fetch limits; this caps the actual recommendations delivered.
+    MAX_RECOMMEND = 15
+
     def get_max_items(self) -> int:
         """Return the max number of items to recommend. Override in subclass."""
         return 30
@@ -228,9 +232,10 @@ class BaseSource(ABC):
                 if result:
                     recommendations.append(result)
 
+        limit = min(self.get_max_items(), self.MAX_RECOMMEND)
         recommendations = sorted(
             recommendations, key=lambda x: x.get("score", 0), reverse=True
-        )[:self.get_max_items()]
+        )[:limit]
 
         if self.save_dir:
             self._save_markdown(recommendations)

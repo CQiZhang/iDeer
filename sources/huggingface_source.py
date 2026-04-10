@@ -219,7 +219,7 @@ class HuggingFaceSource(BaseSource):
         paper_recs = sorted(paper_recs, key=lambda x: x.get("score", 0), reverse=True)[:self.max_papers]
         model_recs = sorted(model_recs, key=lambda x: x.get("score", 0), reverse=True)[:self.max_models]
 
-        combined = paper_recs + model_recs
+        combined = sorted(paper_recs + model_recs, key=lambda x: x.get("score", 0), reverse=True)[:self.MAX_RECOMMEND]
 
         if self.save_dir:
             self._save_markdown(combined)
