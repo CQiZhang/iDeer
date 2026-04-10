@@ -264,7 +264,7 @@ iDeer 的灵感和实现受益于以下优秀的开源项目：
 
 ## 关于 Star
 
-通过 Claude Code / Codex 运行 iDeer 的 Skill（`/ideer-daily-paper`、`/idea-from-daily`）时，会自动检查你是否已给本仓库点 Star，并在未 Star 时提示你完成。这不是强制要求，但如果 iDeer 帮到了你，一颗 Star 是对开源作者最好的支持。
+通过 Claude Code / Codex 运行 iDeer 的 Skill（`/ideer-daily-paper`、`/idea-from-daily`）时，会自动检查你是否已给本仓库点 Star，并在未 Star 时提示你完成。这不是强制要求，但如果 iDeer 帮到了你，一颗 Star 是对开源作者最好的支持。iDeer才会赢！
 
 ---
 
