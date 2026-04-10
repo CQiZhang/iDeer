@@ -117,6 +117,26 @@ class BaseSource(ABC):
         """Return the max number of items to recommend. Override in subclass."""
         return 30
 
+    @staticmethod
+    def _ensure_str(value) -> str:
+        """Ensure a value is a plain string. LLMs sometimes return dicts/lists
+        for the summary field when the user description is structured."""
+        if isinstance(value, str):
+            return value
+        if isinstance(value, dict):
+            # Flatten nested dict into readable text
+            parts = []
+            for k, v in value.items():
+                if isinstance(v, dict):
+                    sub = "；".join(f"{sk}: {sv}" for sk, sv in v.items())
+                    parts.append(f"【{k}】{sub}")
+                else:
+                    parts.append(f"【{k}】{v}")
+            return " ".join(parts)
+        if isinstance(value, list):
+            return "；".join(str(item) for item in value)
+        return str(value)
+
     def _load_fetch_cache(self, key: str) -> list[dict] | None:
         """Load shared fetch cache (interest-independent)."""
         from cache_utils import safe_read_json
