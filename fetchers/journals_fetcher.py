@@ -88,15 +88,11 @@ def _fetch_journal_works(
 
     url = f"{CROSSREF_BASE}/journals/{issn}/works"
     params = {
-        "filter": f"from-pub-date:{from_date}",
-        "rows": rows,
-        "sort": "published",
-        "order": "desc",
-        # 只要正式研究类型，过滤 editorial/news/correction 等噪音
-        "select": "DOI,title,author,container-title,abstract,"
-          "published,issued,created,"
-          "URL,type,subtype",
-    }
+    "filter": f"from-pub-date:{from_date}",
+    "rows": rows,
+    "sort": "published",
+    "order": "desc",
+}
     ua = f"DailyPaperBot/1.0 (mailto:{mailto})" if mailto else "DailyPaperBot/1.0"
     headers = {"User-Agent": ua}
 
