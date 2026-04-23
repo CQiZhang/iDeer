@@ -1,200 +1,193 @@
-import re
-import time
-import requests
-from datetime import datetime, timedelta
+import argparse
+import hashlib
+import json
+
+from sources.base import BaseSource
+from core.config import LLMConfig, CommonConfig
+from fetchers.journals_fetcher import fetch_papers_for_journals, JOURNAL_ISSN
+from email_utils.base_template import get_stars
+from email_utils.pubmed_template import get_paper_block_html
 
 
-# 期刊配置：key -> (展示名, ISSN)
-# ISSN 已逐一核实，可直接用于 CrossRef API
-JOURNAL_ISSN = {
-    "nature":         ("Nature",                     "0028-0836"),
-    "science":        ("Science",                    "0036-8075"),
-    "nature_food":    ("Nature Food",                "2662-1355"),
-    "nature_water":   ("Nature Water",               "2731-6084"),
-    "nature_climate": ("Nature Climate Change",      "1758-6798"),
-    "nature_cities":  ("Nature Cities",              "2731-9997"),
-    "science_adv":    ("Science Advances",           "2375-2548"),
-    "one_earth":      ("One Earth",                  "2590-3322"),
-    "earths_future":  ("Earth's Future",             "2328-4277"),
-    "cell_rep_sus":   ("Cell Reports Sustainability", "2949-7906"),
-}
+class JournalsSource(BaseSource):
+    name = "journals"
+    default_title = "顶刊每日速递"
 
-CROSSREF_BASE = "https://api.crossref.org"
+    # 默认订阅全部 10 本
+    DEFAULT_JOURNALS = list(JOURNAL_ISSN.keys())
 
+    def __init__(self, source_args: dict, llm_config: LLMConfig, common_config: CommonConfig):
+        super().__init__(source_args, llm_config, common_config)
+        self.journals = source_args.get("journals") or self.DEFAULT_JOURNALS
+        self.max_results = source_args.get("max_results", 30)
+        self.max_papers = source_args.get("max_papers", 15)
+        self.days = source_args.get("days", 7)
+        self.mailto = source_args.get("mailto", "")
 
-def _clean_jats(text: str) -> str:
-    """清洗 CrossRef abstract 中的 JATS XML 标签。"""
-    if not text:
-        return ""
-    text = re.sub(r"</?jats:[^>]+>", "", text)
-    text = re.sub(r"<[^>]+>", "", text)
-    text = re.sub(r"\s+", " ", text).strip()
-    text = re.sub(r"^\s*Abstract[:\s]+", "", text, flags=re.IGNORECASE)
-    return text
+        # 过滤掉未知 key
+        self.journals = [j for j in self.journals if j in JOURNAL_ISSN]
+        if not self.journals:
+            self.journals = self.DEFAULT_JOURNALS
 
+        sig = hashlib.sha256("|".join(sorted(self.journals)).encode()).hexdigest()[:10]
+        cache_key = f"journals_{sig}_{self.max_results}_{self.days}"
 
-def _extract_year(msg: dict) -> int | str:
-    """从 CrossRef 返回中取发表年份，优先用在线发布日期。"""
-    for key in ("published-online", "published", "published-print", "issued", "created"):
-        date_info = msg.get(key, {})
-        parts = date_info.get("date-parts", [[]])
-        if parts and parts[0]:
-            return parts[0][0]
-    return ""
+        cached = self._load_fetch_cache(cache_key)
+        if cached is not None:
+            self.raw_papers = cached
+        else:
+            self.raw_papers = fetch_papers_for_journals(
+                self.journals,
+                days=self.days,
+                max_results_per_journal=self.max_results,
+                mailto=self.mailto,
+            )
+            if self.raw_papers:
+                self._save_fetch_cache(cache_key, self.raw_papers)
 
-
-def _extract_pub_date(msg: dict) -> datetime | None:
-    """取一个可比较的发表日期（用于过滤最近 N 天）。"""
-    for key in ("published-online", "published", "published-print", "issued", "created"):
-        date_info = msg.get(key, {})
-        parts = date_info.get("date-parts", [[]])
-        if parts and parts[0]:
-            dp = parts[0]
-            try:
-                y = dp[0] if len(dp) >= 1 else 1970
-                m = dp[1] if len(dp) >= 2 else 1
-                d = dp[2] if len(dp) >= 3 else 1
-                return datetime(y, m, d)
-            except Exception:
-                continue
-    return None
-
-
-def _format_authors(author_list: list) -> str:
-    """[{given, family}, ...] -> 'A. Smith, B. Lee'"""
-    if not author_list:
-        return ""
-    parts = []
-    for a in author_list:
-        given = a.get("given", "")
-        family = a.get("family", "")
-        name = f"{given} {family}".strip()
-        if name:
-            parts.append(name)
-    return ", ".join(parts)
-
-
-def _fetch_journal_works(
-    issn: str,
-    journal_name: str,
-    days: int,
-    rows: int,
-    mailto: str,
-) -> list[dict]:
-    """
-    按 ISSN + 日期范围从 CrossRef 查询一本期刊的近期论文。
-    """
-    from_date = (datetime.utcnow() - timedelta(days=days)).strftime("%Y-%m-%d")
-
-    url = f"{CROSSREF_BASE}/journals/{issn}/works"
-    params = {
-        "filter": f"from-pub-date:{from_date}",
-        "rows": rows,
-        "sort": "published",
-        "order": "desc",
-        # 只要正式研究类型，过滤 editorial/news/correction 等噪音
-        "select": "DOI,title,author,container-title,abstract,"
-                  "published-online,published,published-print,issued,created,"
-                  "URL,type,subtype",
-    }
-    ua = f"DailyPaperBot/1.0 (mailto:{mailto})" if mailto else "DailyPaperBot/1.0"
-    headers = {"User-Agent": ua}
-
-    try:
-        resp = requests.get(url, params=params, headers=headers, timeout=20)
-        resp.raise_for_status()
-        items = resp.json().get("message", {}).get("items", [])
-    except Exception as e:
-        print(f"[journals_fetcher] {journal_name} 查询失败: {e}")
-        return []
-
-    # 想要的类型：研究论文、综述、Perspective/Analysis 等
-    WANTED_TYPES = {"journal-article"}
-    # 想要剔除的 subtype（Springer Nature 用 subtype 区分 editorial / news / correction 等）
-    DROP_SUBTYPES = {
-        "editorial", "news", "correction", "erratum", "retraction",
-        "book-review", "obituary", "letter", "comment",
-    }
-
-    papers = []
-    for msg in items:
-        if msg.get("type") not in WANTED_TYPES:
-            continue
-        if msg.get("subtype", "").lower() in DROP_SUBTYPES:
-            continue
-
-        doi = msg.get("DOI", "")
-        if not doi:
-            continue
-
-        title_list = msg.get("title", [])
-        title = title_list[0] if title_list else ""
-        if not title:
-            continue
-
-        abstract = _clean_jats(msg.get("abstract", ""))
-
-        papers.append({
-            "paper_id": doi,
-            "doi": doi,
-            "title": title,
-            "authors": _format_authors(msg.get("author", [])),
-            "journal": journal_name,
-            "year": _extract_year(msg),
-            "pub_date": _extract_pub_date(msg),
-            "abstract": abstract,
-            "url": msg.get("URL", f"https://doi.org/{doi}"),
-        })
-
-    return papers
-
-
-def fetch_papers_for_journals(
-    journal_keys: list[str],
-    days: int = 7,
-    max_results_per_journal: int = 30,
-    mailto: str = "",
-) -> list[dict]:
-    """
-    从多本期刊的 CrossRef 接口抓取近 N 天的论文，返回统一格式的 dict 列表。
-    """
-    all_papers = []
-    seen_dois = set()
-
-    for key in journal_keys:
-        if key not in JOURNAL_ISSN:
-            print(f"[journals_fetcher] 未知期刊 key: {key}")
-            continue
-
-        journal_name, issn = JOURNAL_ISSN[key]
-        print(f"[journals_fetcher] 抓取 {journal_name} (ISSN: {issn}) ...")
-
-        papers = _fetch_journal_works(
-            issn=issn,
-            journal_name=journal_name,
-            days=days,
-            rows=max_results_per_journal,
-            mailto=mailto,
+    @staticmethod
+    def add_arguments(parser: argparse.ArgumentParser):
+        parser.add_argument(
+            "--jr_journals", nargs="*", default=[],
+            help="[Journals] 期刊 key 列表，可选: " + ", ".join(JOURNAL_ISSN.keys()),
+        )
+        parser.add_argument(
+            "--jr_max_results", type=int, default=30,
+            help="[Journals] 每本期刊从 CrossRef 抓取的最大条目数",
+        )
+        parser.add_argument(
+            "--jr_max_papers", type=int, default=15,
+            help="[Journals] 最终推荐的论文数量上限",
+        )
+        parser.add_argument(
+            "--jr_days", type=int, default=7,
+            help="[Journals] 抓取最近 N 天的论文",
+        )
+        parser.add_argument(
+            "--jr_mailto", type=str, default="",
+            help="[Journals] 你的邮箱，用于 CrossRef polite pool（强烈建议填写）",
         )
 
-        for p in papers:
-            if p["doi"] in seen_dois:
-                continue
-            seen_dois.add(p["doi"])
-            all_papers.append(p)
+    @staticmethod
+    def extract_args(args) -> dict:
+        return {
+            "journals": args.jr_journals,
+            "max_results": args.jr_max_results,
+            "max_papers": args.jr_max_papers,
+            "days": args.jr_days,
+            "mailto": args.jr_mailto,
+        }
 
-        print(f"  └─ 获得 {len(papers)} 篇")
-        time.sleep(0.5)  # 对 CrossRef 礼貌限速
+    def fetch_items(self) -> list[dict]:
+        print(f"[{self.name}] {len(self.raw_papers)} papers available")
+        return self.raw_papers
 
-    # 按发表日期倒序
-    all_papers.sort(
-        key=lambda p: p.get("pub_date") or datetime(1970, 1, 1),
-        reverse=True,
-    )
+    def get_item_cache_id(self, item: dict) -> str:
+        pid = item.get("paper_id", "unknown")
+        return "jr_" + str(pid).replace("/", "_").replace(".", "_")[:80]
 
-    # pub_date 是 datetime，不能进缓存 JSON；剥离后返回
-    for p in all_papers:
-        p.pop("pub_date", None)
+    def get_max_items(self) -> int:
+        return self.max_papers
 
-    print(f"[journals_fetcher] 共抓取 {len(all_papers)} 篇论文")
-    return all_papers
+    def build_eval_prompt(self, item: dict) -> str:
+        abstract = item.get("abstract", "") or "No abstract available."
+        if len(abstract) > 600:
+            abstract = abstract[:597] + "..."
+
+        return f"""你是一个有帮助的学术研究助手，可以帮助我构建每日论文推荐系统。
+以下是我最近研究领域的描述：
+{self.description}
+
+以下是来自顶级期刊的论文：
+标题: {item['title']}
+作者: {item.get('authors', '')}
+期刊: {item.get('journal', '')}
+年份: {item.get('year', '')}
+摘要: {abstract}
+
+1. 总结这篇论文的主要内容。
+2. 请评估这篇论文与我研究领域的相关性，并给出 0-10 的评分。其中 0 表示完全不相关，10 表示高度相关。
+
+请按以下 JSON 格式给出你的回答：
+{{
+    "summary": "一段纯文本的中文总结（不要嵌套JSON/dict，直接写一段话）",
+    "relevance": <你的评分>
+}}
+重要：summary 必须是一段纯文本字符串，不要返回嵌套的 JSON 对象或字典。
+使用中文回答。
+直接返回上述 JSON 格式，无需任何额外解释。"""
+
+    def parse_eval_response(self, item: dict, response: str) -> dict:
+        response = response.strip("```").strip("json")
+        data = json.loads(response)
+        return {
+            "title": item["title"],
+            "paper_id": item.get("paper_id", ""),
+            "abstract": item.get("abstract", ""),
+            "summary": self._ensure_str(data["summary"]),
+            "score": float(data["relevance"]),
+            "url": item.get("url", ""),
+            "authors": item.get("authors", ""),
+            "journal": item.get("journal", ""),
+            "year": str(item.get("year", "")),
+            "doi": item.get("doi", ""),
+        }
+
+    def render_item_html(self, item: dict) -> str:
+        rate = get_stars(item.get("score", 0))
+        return get_paper_block_html(
+            item["title"],
+            rate,
+            item.get("authors", ""),
+            item.get("journal", ""),
+            str(item.get("year", "")),
+            item.get("paper_id", ""),
+            item["summary"],
+            item.get("url", ""),
+        )
+
+    def get_theme_color(self) -> str:
+        return "21,101,192"  # 顶刊蓝
+
+    def get_section_header(self) -> str:
+        names = [JOURNAL_ISSN[k][0] for k in self.journals[:3]]
+        hint = ", ".join(names)
+        if len(self.journals) > 3:
+            hint += f" +{len(self.journals) - 3}"
+        return f'<div class="section-title" style="border-bottom-color: #1565c0;">📚 顶刊速递 ({hint})</div>'
+
+    def build_summary_overview(self, recommendations: list[dict]) -> str:
+        overview = ""
+        for i, r in enumerate(recommendations):
+            journal = r.get("journal", "")
+            year = r.get("year", "")
+            meta = f" ({journal}, {year})" if journal else f" ({year})" if year else ""
+            overview += f"{i + 1}. {r['title']}{meta} - {r['summary']}\n"
+        return overview
+
+    def get_summary_prompt_template(self) -> str:
+        return """
+            请直接输出一段 HTML 片段，严格遵循以下结构，不要包含 JSON、Markdown 或多余说明：
+            <div class="summary-wrapper">
+              <div class="summary-section">
+                <h2>今日顶刊动态</h2>
+                <p>分析今天的论文趋势...</p>
+              </div>
+              <div class="summary-section">
+                <h2>重点推荐</h2>
+                <ol class="summary-list">
+                  <li class="summary-item">
+                    <div class="summary-item__header"><span class="summary-item__title">标题</span><span class="summary-pill">期刊</span></div>
+                    <p><strong>推荐理由：</strong>...</p>
+                    <p><strong>关键发现：</strong>...</p>
+                  </li>
+                </ol>
+              </div>
+              <div class="summary-section">
+                <h2>补充观察</h2>
+                <p>其他值得关注的方向...</p>
+              </div>
+            </div>
+
+            用中文撰写内容，重点推荐部分建议返回 3-5 篇论文。
+        """
