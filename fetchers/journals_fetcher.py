@@ -94,8 +94,8 @@ def _fetch_journal_works(
         "order": "desc",
         # 只要正式研究类型，过滤 editorial/news/correction 等噪音
         "select": "DOI,title,author,container-title,abstract,"
-                  "published-online,published,published-print,issued,created,"
-                  "URL,type,subtype",
+          "published,issued,created,"
+          "URL,type,subtype",
     }
     ua = f"DailyPaperBot/1.0 (mailto:{mailto})" if mailto else "DailyPaperBot/1.0"
     headers = {"User-Agent": ua}
