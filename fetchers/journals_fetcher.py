@@ -34,8 +34,8 @@ def _clean_jats(text: str) -> str:
 
 
 def _extract_year(msg: dict) -> int | str:
-    """从 CrossRef 返回中取发表年份，优先用在线发布日期。"""
-    for key in ("published-online", "published", "published-print", "issued", "created"):
+    """从 CrossRef 返回中取发表年份。"""
+    for key in ("published", "issued", "created"):
         date_info = msg.get(key, {})
         parts = date_info.get("date-parts", [[]])
         if parts and parts[0]:
@@ -45,7 +45,7 @@ def _extract_year(msg: dict) -> int | str:
 
 def _extract_pub_date(msg: dict) -> datetime | None:
     """取一个可比较的发表日期（用于过滤最近 N 天）。"""
-    for key in ("published-online", "published", "published-print", "issued", "created"):
+    for key in ("published", "issued", "created"):
         date_info = msg.get(key, {})
         parts = date_info.get("date-parts", [[]])
         if parts and parts[0]:
