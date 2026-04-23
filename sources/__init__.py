@@ -13,5 +13,5 @@ SOURCE_REGISTRY = {
     "arxiv": ArxivSource,
     "semanticscholar": SemanticScholarSource,
     "pubmed": PubMedSource,
-    "journals": Nature, Science, Nature Food, Nature Water, Nature Climate Change, Nature Cities, Science Advances, One Earth, Earth's Future, Cell Reports Sustainability,
+    "journals": JournalsSource,
 }
