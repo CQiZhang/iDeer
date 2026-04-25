@@ -1,18 +1,14 @@
-I am a researcher focused on AI Agent Safety. My core research interests span the following areas:
+I am a researcher focused on the sustainable development of agri-food systems under climate change. My core research interests span the following areas:
 
-1. Agent Safety — Safety of LLM-based autonomous agents, including unsafe tool use, unintended side effects, goal misgeneralization, out-of-distribution behavior, and safe exploration in agentic workflows.
+1. Economic Water Scarcity in Agriculture — Understanding why croplands with available renewable water remain un-irrigated due to institutional, economic, infrastructural, and governance constraints; identifying where sustainable irrigation expansion can strengthen food and water security; the political economy of water allocation; smallholder access to irrigation; the gap between physical water availability and effective water use in agriculture.
 
-2. Hallucination — Factual errors, confabulation, and grounding failures in LLMs and agents; detection, mitigation, and evaluation of hallucination; retrieval-augmented generation as a countermeasure.
+2. Food Price–Food Poverty Transmission — How movements in food prices translate into food poverty and food insecurity outcomes; the heterogeneity of this transmission across households, markets, regions, and income groups; pass-through mechanisms from international price shocks to domestic welfare; the role of trade policy, market integration, and social protection in buffering price shocks; price-water early warning systems for food security.
 
-3. Misalignment — Value misalignment, reward hacking, specification gaming, Goodhart's Law, and failures of RLHF/RLAIF; scalable oversight, weak-to-strong generalization, and alignment evaluation.
+3. Climate-Related Migration, Immobility, and Food Insecurity — How drought, water stress, and climate variability shape migration aspirations, capacities, and trapped populations; the role of irrigation infrastructure and adaptation investments in shaping mobility outcomes; the food security consequences of both migration and immobility; environmental migration as a livelihood strategy versus distress response.
 
-4. Deception — LLM deceptive behavior, sycophancy, sandbagging, hidden reasoning, strategic manipulation, and dishonesty in agents; detecting and eliciting deceptive behavior.
+Cross-cutting methodological interests include: multi-regional input-output (MRIO) models for tracing climate–food–economy linkages; econometric analysis of household and panel data; scenario modeling of low-carbon transitions in agri-food systems; carbon accounting in food supply chains; agent-based or computable general equilibrium approaches to food system risk; remote sensing and geospatial analysis for cropland and water use.
 
-5. Codex / Code Agents — Safety of code-generating models and autonomous coding agents (e.g., OpenHands, SWE-agent, Codex); vulnerabilities introduced by agent-generated code, backdoors, and code-level attacks.
+I am NOT interested in: pure machine learning / deep learning methodology papers, LLM benchmarks, AI agent architectures, multimodal models, computer vision, NLP methods, or any AI/ML research where the contribution is purely technical. AI/ML work is only relevant to me when it is explicitly applied as a tool to my substantive topics above (e.g., ML for crop yield forecasting under climate stress, NLP applied to food policy text analysis, remote sensing ML for irrigation mapping). Generic "AI for sustainability" framing without substantive engagement with food systems, water, climate adaptation, or poverty is NOT relevant.
 
-6. Prompt Optimization & Attacks — Adversarial prompts, jailbreaks, prompt injection, automated red-teaming, and prompt optimization methods (e.g., APE, GCG, AutoDAN); defenses and robustness to prompt-level attacks.
-
-I am NOT interested in: computer vision safety, hardware security, network intrusion detection, classical ML robustness unrelated to LLMs.
-
-IMPORTANT: When generating the summary, please organize the content BY EACH of my six interest directions above.
-For each direction, list the most relevant papers/repos/items separately with a brief explanation of why each is relevant to my research. Prioritize items that sit at the intersection of multiple directions (e.g., deceptive agents, misaligned code agents, prompt-based attacks on agent safety).
+IMPORTANT: When generating the summary, please organize the content BY EACH of my three interest directions above.
+For each direction, list the most relevant papers/repos/items separately with a brief explanation of why each is relevant to my research. Prioritize items that sit at the intersection of multiple directions (e.g., drought-driven migration affecting food prices, irrigation infrastructure linking water scarcity and migration immobility, MRIO analyses connecting price shocks to poverty outcomes).
