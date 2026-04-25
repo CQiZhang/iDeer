@@ -3,53 +3,57 @@
 ## Research Directions
 
 ### Primary Areas
-1. **Agent** — LLM-based agents, tool use, multi-step reasoning, agentic workflows, autonomous systems, embodied agents
-2. **Safety** — AI safety, alignment, jailbreak, red-teaming, guardrails, RLHF, harmful content detection
-3. **Trustworthy** — trustworthy AI, robustness, fairness, interpretability, hallucination, uncertainty
+1. **Economic Water Scarcity** — institutional and economic constraints on irrigation, un-irrigated croplands with renewable water, sustainable irrigation expansion, smallholder water access, water governance, agricultural water productivity
+2. **Food Price–Poverty Transmission** — food price shocks, price-poverty pass-through, household heterogeneity in welfare impacts, international-to-domestic price transmission, market integration, food insecurity, social protection buffers
+3. **Climate Migration & Immobility** — drought-driven migration aspirations, trapped populations, irrigation infrastructure and mobility, environmental displacement, food insecurity outcomes of migration and immobility, adaptation-mobility nexus
 
 ### Sub-directions
-- Embodied AI & VLA (Vision-Language-Action)
-- Benchmark design & evaluation methodology
-- Domain-specific RAG systems
-- Egocentric video understanding
-- Multi-agent collaboration & safety
+- Multi-regional input-output (MRIO) analysis of agri-food systems
+- Climate-economic-food nexus modeling
+- Low-carbon transition pathways for urban agglomeration agri-food systems
+- Carbon accounting and inclusivity in food supply chains
+- Price-water early warning systems for food security
+- Agri-food system risk management under climate change
+- Demand-hierarchy frameworks for low-carbon consumption
+- Synergies among consumption stimulus, circular economy, and emission reduction
 
 ## Active Projects
-
 | Project | Description | Status |
 |---------|-------------|--------|
-| ATbench_Engine | Benchmark engine for agent trustworthiness evaluation | Active |
-| AgentDoG | Agent safety / defense-oriented generation | Active |
-| ECCV_VLA | Vision-Language-Action models for embodied AI | Active |
-| Domain-RAG | Domain-specific retrieval-augmented generation | Active |
-| embody_bench | Embodied agent benchmark | Active |
-| egocross | Egocentric cross-view understanding | Active |
+| Climate-Food-Economy Nexus | Coupling climate, economic, and food system dynamics across regions | Active |
+| MRIO Agri-food Risk | Multi-regional input-output modeling of agri-food system risks under climate stress | Active |
+| Urban Agglomeration Low-Carbon | Low-carbon transition of agri-food systems in BTH/YRD/PRD urban agglomerations | Active |
+| Price-Water Early Warning | Early warning system linking water stress, food prices, and food poverty | Active |
+| Environmental Migration | Drought, irrigation, and migration/immobility dynamics in food-insecure regions | Exploratory |
+| Carbon Inclusivity Scenarios | Emission reduction potential of carbon inclusivity (碳普惠) across agents and scenarios | Active |
 
 ## Publications
-
 <!--
 TODO: Populate from Google Scholar.
 To auto-fetch, provide your Google Scholar profile URL and run:
   python -c "from pipeline.idea_generator import fetch_scholar_publications; fetch_scholar_publications('SCHOLAR_ID')"
 -->
-
 - (Pending Google Scholar integration — please provide your Scholar profile URL to auto-populate)
+- Working papers on low-carbon transitions in urban agglomeration agri-food systems under climate and food security goals (in preparation for SCI submission)
 
 ## Target Venues
-
-- **Top ML**: NeurIPS, ICML, ICLR
-- **Vision**: ECCV, CVPR
-- **NLP**: ACL, EMNLP
-- **Multimedia**: ACM MM
+- **Environment & Sustainability**: Nature Food, Nature Sustainability, Global Environmental Change, Environmental Research Letters, One Earth
+- **Agricultural & Resource Economics**: American Journal of Agricultural Economics, Food Policy, Agricultural Economics, World Development
+- **Water & Climate**: Water Resources Research, Climatic Change, Climate Policy, Journal of Hydrology
+- **Industrial Ecology / IO**: Journal of Industrial Ecology, Ecological Economics, Resources, Conservation and Recycling
+- **Migration & Development**: Population and Environment, Global Environmental Change, World Development
 
 ## Available Resources
-
-- GPU cluster access (multi-node training capable)
-- Access to commercial LLM APIs (OpenAI, etc.)
+- R and MATLAB for econometric and IO modeling
+- Access to China Urban Data 5.0 and municipal agricultural panel datasets
+- Multi-regional input-output databases (e.g., GTAP, EORA, China MRIO)
+- Cardiff University collaboration on agri-food system risk management
+- Supervisor collaboration with Dr. Pan He at Sun Yat-sen University
 
 ## Research Style & Preferences
-
-- **Empirical-first**: Prefer ideas validated by experiments over pure theory
-- **Benchmark-oriented**: Strong preference for building evaluation frameworks
-- **Cross-domain**: Interested in connecting Agent + Safety + Trustworthy directions
-- **Publication-driven**: Ideas should target specific top venues
+- **Empirical & quantitative-first**: Prefer ideas grounded in econometric identification, IO accounting, or scenario simulation over purely conceptual work
+- **Policy-relevant**: Strong preference for research with direct implications for food security, water, climate adaptation, and poverty reduction policy
+- **Cross-scale**: Interested in connecting household-level welfare outcomes with regional, national, and international system dynamics
+- **Cross-disciplinary**: Comfortable bridging environmental science, applied economics, and food systems research
+- **Mechanism-oriented**: Prioritize work that identifies transmission channels (price→poverty, drought→migration, water→food) over reduced-form correlations
+- **AI/ML as tool, not topic**: Only interested in AI/ML when explicitly applied to substantive questions in water, food, climate, or migration — not in methodological AI research itself
