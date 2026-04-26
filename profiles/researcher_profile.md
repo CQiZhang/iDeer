@@ -48,7 +48,7 @@ To auto-fetch, provide your Google Scholar profile URL and run:
 - Access to China Urban Data 5.0 and municipal agricultural panel datasets
 - Multi-regional input-output databases (e.g., GTAP, EORA, China MRIO)
 - Cardiff University collaboration on agri-food system risk management
-- Supervisor collaboration with Dr. Pan He at Sun Yat-sen University
+- Supervisor collaboration with Dr. Pan He at Cardiff University
 
 ## Research Style & Preferences
 - **Empirical & quantitative-first**: Prefer ideas grounded in econometric identification, IO accounting, or scenario simulation over purely conceptual work
