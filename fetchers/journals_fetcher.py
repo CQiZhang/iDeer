@@ -5,8 +5,10 @@ from datetime import datetime, timedelta
 
 
 # 期刊配置：key -> (展示名, ISSN)
-# ISSN 已逐一核实，可直接用于 CrossRef API
+# ISSN 已逐一通过 portal.issn.org / 出版商官网核实，可直接用于 CrossRef API
+# CrossRef 优先使用 eISSN；纯电子刊 e=p
 JOURNAL_ISSN = {
+    # ========== 原有 10 本（保留不动）==========
     "nature":         ("Nature",                     "0028-0836"),
     "science":        ("Science",                    "0036-8075"),
     "nature_food":    ("Nature Food",                "2662-1355"),
@@ -17,6 +19,50 @@ JOURNAL_ISSN = {
     "one_earth":      ("One Earth",                  "2590-3322"),
     "earths_future":  ("Earth's Future",             "2328-4277"),
     "cell_rep_sus":   ("Cell Reports Sustainability", "2949-7906"),
+
+    # ========== 新增 26 本 ==========
+    # ---------- 环境科学与可持续性 ----------
+    "est":              ("Environmental Science & Technology",        "1520-5851"),
+    "erl":              ("Environmental Research Letters",            "1748-9326"),
+    "rcr":              ("Resources, Conservation and Recycling",     "1879-0658"),
+    "nat_sustain":      ("Nature Sustainability",                     "2398-9629"),
+    "comm_earth_env":   ("Communications Earth & Environment",        "2662-4435"),
+    "ambio":            ("Ambio",                                     "1654-7209"),
+    "nrev_earth_env":   ("Nature Reviews Earth & Environment",        "2662-138X"),
+
+    # ---------- 全球变化与气候 ----------
+    "gec":              ("Global Environmental Change",               "1872-9495"),
+    "gcb":              ("Global Change Biology",                     "1365-2486"),
+
+    # ---------- 水资源 ----------
+    "water_res":        ("Water Research",                            "1879-2448"),
+    "agr_water_mgmt":   ("Agricultural Water Management",             "1873-2283"),
+
+    # ---------- 食物 / 粮食安全 / 农业经济 ----------
+    "food_security":    ("Food Security",                             "1876-4525"),
+    "global_food_sec":  ("Global Food Security",                      "2211-9124"),
+    "food_policy":      ("Food Policy",                               "1873-5657"),
+    "ag_econ":          ("Agricultural Economics",                   "1574-0862"),
+
+    # ---------- 综合 / 顶刊 ----------
+    "pnas":             ("Proceedings of the National Academy of Sciences", "1091-6490"),
+    "pnas_nexus":       ("PNAS Nexus",                                "2752-6542"),
+    "nat_commun":       ("Nature Communications",                     "2041-1723"),
+    "sci_rep":          ("Scientific Reports",                        "2045-2322"),
+    "sci_data":         ("Scientific Data",                           "2052-4463"),
+    "nat_hum_behav":    ("Nature Human Behaviour",                    "2397-3374"),
+
+    # ---------- 健康 / Lancet 系列 ----------
+    "lancet":           ("The Lancet",                                "1474-547X"),
+    "lancet_glob_h":    ("The Lancet Global Health",                  "2214-109X"),
+    "lancet_planet_h":  ("The Lancet Planetary Health",               "2542-5196"),
+
+    # ---------- 城市可持续 / 能源 ----------
+    "npj_urban_sus":    ("npj Urban Sustainability",                  "2661-8001"),
+    "applied_energy":   ("Applied Energy",                            "1872-9118"),
+
+    # ---------- 迁移 ----------
+    "jems":             ("Journal of Ethnic and Migration Studies",   "1469-9451"),
 }
 
 CROSSREF_BASE = "https://api.crossref.org"
