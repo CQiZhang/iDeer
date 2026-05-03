@@ -56,7 +56,7 @@ class JournalsSource(BaseSource):
             help="[Journals] 每本期刊从 CrossRef 抓取的最大条目数",
         )
         parser.add_argument(
-            "--jr_max_papers", type=int, default=15,
+            "--jr_max_papers", type=int, default=50,
             help="[Journals] 最终推荐的论文数量上限",
         )
         parser.add_argument(
