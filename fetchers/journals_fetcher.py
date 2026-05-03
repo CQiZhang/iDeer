@@ -5,8 +5,9 @@ from datetime import datetime, timedelta
 
 
 # 期刊配置：key -> (展示名, ISSN)
-# 注：CrossRef 的 /journals/{issn}/works endpoint 对老 Elsevier 刊
-# 通常只认 pISSN（印刷 ISSN），不认 eISSN。下面已根据实际抓取结果做了修正。
+# 注：CrossRef 的 /journals/{issn}/works endpoint 对 Elsevier 老刊和部分老牌
+# 学会刊通常只认 pISSN（印刷 ISSN），不认 eISSN。下面已根据实际抓取结果做了修正。
+# 经济学顶刊（AEA / Wiley / Elsevier）一律使用 pISSN。
 JOURNAL_ISSN = {
     # ========== 原有 10 本（保留不动）==========
     "nature":         ("Nature",                     "0028-0836"),
@@ -20,29 +21,29 @@ JOURNAL_ISSN = {
     "earths_future":  ("Earth's Future",             "2328-4277"),
     "cell_rep_sus":   ("Cell Reports Sustainability", "2949-7906"),
 
-    # ========== 新增 26 本 ==========
+    # ========== 第一批新增 26 本 ==========
     # ---------- 环境科学与可持续性 ----------
-    "est":              ("Environmental Science & Technology",        "1520-5851"),  # eISSN 可用
-    "erl":              ("Environmental Research Letters",            "1748-9326"),  # 纯OA, e=p
-    "rcr":              ("Resources, Conservation and Recycling",     "0921-3449"),  # ★ pISSN（eISSN 1879-0658 在 CrossRef 上 404）
+    "est":              ("Environmental Science & Technology",        "1520-5851"),
+    "erl":              ("Environmental Research Letters",            "1748-9326"),
+    "rcr":              ("Resources, Conservation and Recycling",     "0921-3449"),  # pISSN
     "nat_sustain":      ("Nature Sustainability",                     "2398-9629"),
     "comm_earth_env":   ("Communications Earth & Environment",        "2662-4435"),
     "ambio":            ("Ambio",                                     "1654-7209"),
     "nrev_earth_env":   ("Nature Reviews Earth & Environment",        "2662-138X"),
 
     # ---------- 全球变化与气候 ----------
-    "gec":              ("Global Environmental Change",               "0959-3780"),  # ★ pISSN（eISSN 1872-9495 在 CrossRef 上 404）
+    "gec":              ("Global Environmental Change",               "0959-3780"),  # pISSN
     "gcb":              ("Global Change Biology",                     "1365-2486"),
 
     # ---------- 水资源 ----------
-    "water_res":        ("Water Research",                            "0043-1354"),  # ★ pISSN（eISSN 1879-2448 在 CrossRef 上 404）
-    "agr_water_mgmt":   ("Agricultural Water Management",             "0378-3774"),  # ★ pISSN（eISSN 1873-2283 在 CrossRef 上 404）
+    "water_res":        ("Water Research",                            "0043-1354"),  # pISSN
+    "agr_water_mgmt":   ("Agricultural Water Management",             "0378-3774"),  # pISSN
 
-    # ---------- 食物 / 粮食安全 / 农业经济 ----------
+    # ---------- 食物 / 粮食安全 / 农业经济（IAAE）----------
     "food_security":    ("Food Security",                             "1876-4525"),
     "global_food_sec":  ("Global Food Security",                      "2211-9124"),
-    "food_policy":      ("Food Policy",                               "0306-9192"),  # ★ pISSN（eISSN 1873-5657 在 CrossRef 上 404）
-    "ag_econ":          ("Agricultural Economics",                    "1574-0862"),
+    "food_policy":      ("Food Policy",                               "0306-9192"),  # pISSN
+    "ag_econ":          ("Agricultural Economics",                    "1574-0862"),  # IAAE/Wiley
 
     # ---------- 综合 / 顶刊 ----------
     "pnas":             ("Proceedings of the National Academy of Sciences", "1091-6490"),
@@ -53,16 +54,33 @@ JOURNAL_ISSN = {
     "nat_hum_behav":    ("Nature Human Behaviour",                    "2397-3374"),
 
     # ---------- 健康 / Lancet 系列 ----------
-    "lancet":           ("The Lancet",                                "0140-6736"),  # ★ 改为 pISSN（eISSN 1474-547X 上次返回 0,保险起见换）
-    "lancet_glob_h":    ("The Lancet Global Health",                  "2214-109X"),  # 上次抓到 28 篇,可用
-    "lancet_planet_h":  ("The Lancet Planetary Health",               "2542-5196"),  # 月刊,本周可能确无新文,先保持
+    "lancet":           ("The Lancet",                                "0140-6736"),  # pISSN
+    "lancet_glob_h":    ("The Lancet Global Health",                  "2214-109X"),
+    "lancet_planet_h":  ("The Lancet Planetary Health",               "2542-5196"),
 
     # ---------- 城市可持续 / 能源 ----------
     "npj_urban_sus":    ("npj Urban Sustainability",                  "2661-8001"),
-    "applied_energy":   ("Applied Energy",                            "0306-2619"),  # ★ pISSN（eISSN 1872-9118 在 CrossRef 上 404）
+    "applied_energy":   ("Applied Energy",                            "0306-2619"),  # pISSN
 
     # ---------- 迁移 ----------
     "jems":             ("Journal of Ethnic and Migration Studies",   "1469-9451"),
+
+    # ========== 第二批新增 10 本：经济学顶刊 ==========
+    # ---------- AEA 旗舰刊 ----------
+    "aer":              ("American Economic Review",                  "0002-8282"),  # AEA
+    "jel":              ("Journal of Economic Literature",            "0022-0515"),  # AEA
+    "jep":              ("Journal of Economic Perspectives",          "0895-3309"),  # AEA
+
+    # ---------- AEJ 系列 4 本 ----------
+    "aej_app":          ("American Economic Journal: Applied Economics",   "1945-7782"),
+    "aej_pol":          ("American Economic Journal: Economic Policy",     "1945-7731"),
+    "aej_macro":        ("American Economic Journal: Macroeconomics",      "1945-7707"),
+    "aej_micro":        ("American Economic Journal: Microeconomics",      "1945-7669"),
+
+    # ---------- 农业 / 环境 / 发展经济学 ----------
+    "ajae":             ("American Journal of Agricultural Economics",     "0002-9092"),  # AAEA/Wiley
+    "jeem":             ("Journal of Environmental Economics and Management", "0095-0696"),  # Elsevier
+    "jde":              ("Journal of Development Economics",               "0304-3878"),  # Elsevier
 }
 
 CROSSREF_BASE = "https://api.crossref.org"
