@@ -20,7 +20,7 @@ class JournalsSource(BaseSource):
         super().__init__(source_args, llm_config, common_config)
         self.journals = source_args.get("journals") or self.DEFAULT_JOURNALS
         self.max_results = source_args.get("max_results", 30)
-        self.max_papers = source_args.get("max_papers", 30)
+        self.max_papers = source_args.get("max_papers", 50)
         self.days = source_args.get("days", 2)
         self.mailto = source_args.get("mailto", "") or "15726114709@163.com"
 
